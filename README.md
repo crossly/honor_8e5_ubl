@@ -352,6 +352,7 @@ hnubl 及随附修补器、模块、KBL 中属于本项目的代码采用 **AGPL
 
 第三方组件沿用各自许可证，项目整体许可不替代其原有声明。请保留 [`app/src/main/assets/licenses/`](app/src/main/assets/licenses/) 及 [`third_party/`](third_party/) 中的许可证、来源和 NOTICE。项目按现状提供，设备和固件适用性需要由使用者确认。
 
+### 致谢
 
 感谢道可道公布的efisp利用，让各大品牌8e5设备的解锁和假回锁成为了可能！
 
