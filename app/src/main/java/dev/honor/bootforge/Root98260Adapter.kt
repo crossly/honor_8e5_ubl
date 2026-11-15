@@ -28,6 +28,7 @@ object Root98260Adapter : RootAdapter {
         for (name in SUPPORT_ASSETS) {
             pushRootAsset(shell, application, "$ASSET_ROOT/$name", "$WORK_DIR/$name")
         }
+        pushRootAsset(shell, application, "magic/block_write_probe", "$WORK_DIR/block_write_probe")
         pushRootAsset(shell, application, "$ASSET_ROOT/run98260.sh", "$WORK_DIR/98260/run98260.sh")
         for (profile in PROFILES) {
             for (name in PROFILE_ASSETS) {
@@ -46,6 +47,7 @@ object Root98260Adapter : RootAdapter {
         checkKernel(shell, application)
         if (channelAlive(shell, application)) {
             log("98260：rootd 通道仍存活，直接接入")
+            log("98260：${verify98260WriteAccess(shell, application, WORK_DIR)}")
             clearFailureRecord(shell, application)
             markRootChainSuccess(shell, application, RootChain.CVE_2026_98260)
             return rootProvider()
@@ -99,6 +101,7 @@ object Root98260Adapter : RootAdapter {
                             "sh $WORK_DIR/root-command.sh aWQgLXU=", 20, "98260 Root 自检")
                         check(proof.output.trim() == "0") { "98260 rootd 返回的身份不是 UID 0：${proof.output}" }
                         log("98260：ROOT_UID=0")
+                        log("98260：${verify98260WriteAccess(shell, application, WORK_DIR)}")
                         clearFailureRecord(shell, application)
                         markRootChainSuccess(shell, application, RootChain.CVE_2026_98260)
                         return rootProvider()

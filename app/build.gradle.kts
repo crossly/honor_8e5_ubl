@@ -12,8 +12,8 @@ android {
         applicationId = "net.hawyn.honor8e5ubl"
         minSdk = 28
         targetSdk = 37
-        versionCode = 118
-        versionName = "3.1.8"
+        versionCode = 120
+        versionName = "3.2.0"
         manifestPlaceholders["appLabel"] = "hnubl"
         ndk { abiFilters += "arm64-v8a" }
     }
@@ -148,6 +148,31 @@ val compileBfExec = tasks.register<Exec>("compileBfExec") {
     }
 }
 tasks.named("preBuild").configure { dependsOn(compileBfExec) }
+
+val compileBlockWriteProbe = tasks.register<Exec>("compileBlockWriteProbe") {
+    val source = layout.projectDirectory.file("src/main/cpp/block_write_probe.c")
+    val output = layout.buildDirectory.file("generated/magicAssets/magic/block_write_probe")
+    inputs.file(source)
+    outputs.file(output)
+    doFirst {
+        val sdk = androidComponents.sdkComponents.sdkDirectory.get().asFile
+        val ndk = System.getenv("ANDROID_NDK_HOME")?.let(::File)
+            ?: File(sdk, "ndk").listFiles()?.sortedByDescending { it.name }?.firstOrNull {
+                File(it, "toolchains/llvm/prebuilt").isDirectory
+            } ?: error("Android NDK is required to compile the block write probe")
+        val prebuilt = File(ndk, "toolchains/llvm/prebuilt").listFiles()?.firstOrNull { it.isDirectory }
+            ?: error("NDK LLVM toolchain is missing")
+        val windows = System.getProperty("os.name").startsWith("Windows")
+        val clang = File(prebuilt, "bin/aarch64-linux-android28-clang" + if (windows) ".cmd" else "")
+        val target = output.get().asFile
+        target.parentFile.mkdirs()
+        val temp = layout.buildDirectory.dir("nativeTemp").get().asFile.apply { mkdirs() }
+        environment("TMP", temp.absolutePath)
+        environment("TEMP", temp.absolutePath)
+        commandLine(clang.absolutePath, "-std=c11", "-Wall", "-Wextra", "-Werror", "-O2", "-static", source.asFile.absolutePath, "-o", target.absolutePath)
+    }
+}
+tasks.named("preBuild").configure { dependsOn(compileBlockWriteProbe) }
 
 val compileCredTarget = tasks.register<Exec>("compileCredTarget") {
     val source = layout.projectDirectory.file("src/main/cpp/cred_target.c")

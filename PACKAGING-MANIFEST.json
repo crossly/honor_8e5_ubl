@@ -1,8 +1,8 @@
 {
   "application": {
     "applicationId": "net.hawyn.honor8e5ubl",
-    "versionCode": 118,
-    "versionName": "3.1.8"
+    "versionCode": 120,
+    "versionName": "3.2.0"
   },
   "baseline": "3.1.7",
   "excluded": [
@@ -19,7 +19,7 @@
     "version": "3.1.8",
     "versionCode": 118
   },
-  "scope": "Clear both the software-update badge and the launcher Settings badge when the updater displays the latest-version state",
+  "scope": "Keep SELinux permissive for 98260 rootd and verify raw block-device RW-open before flashing",
   "standaloneFakebl": {
     "applicationId": "net.hawyn.ablefispfakebl",
     "versionCode": 35,

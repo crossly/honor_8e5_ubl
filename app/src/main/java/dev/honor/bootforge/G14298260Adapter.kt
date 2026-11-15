@@ -19,6 +19,7 @@ internal object G14298260Adapter : NewKernelRootAdapterBase(RootChain.CVE_2026_9
         for (name in SUPPORT_ASSETS) {
             pushRootAsset(shell, application, "$ASSET_ROOT/$name", "$WORK_DIR/$name")
         }
+        pushRootAsset(shell, application, "magic/block_write_probe", "$WORK_DIR/block_write_probe")
         for (name in PROFILE_ASSETS) {
             pushRootAsset(shell, application, "$ASSET_ROOT/98260-aph136g142/$name", "$WORK_DIR/98260-aph136g142/$name")
         }
@@ -31,6 +32,7 @@ internal object G14298260Adapter : NewKernelRootAdapterBase(RootChain.CVE_2026_9
     override suspend fun openRootSession(shell: ShellAccess, application: Application) {
         if (channelAlive(shell, application)) {
             log("rootd 通道仍存活，直接接入")
+            log(verify98260WriteAccess(shell, application, WORK_DIR))
             clearFailureRecord(shell, application)
             return
         }
@@ -80,6 +82,7 @@ internal object G14298260Adapter : NewKernelRootAdapterBase(RootChain.CVE_2026_9
                 when (rootFinishKind(RootChain.CVE_2026_98260, tail)) {
                     ROOT_FINISH_DONE -> {
                         log("G142 rootd 已建立，UID 0 验证通过")
+                        log(verify98260WriteAccess(shell, application, WORK_DIR))
                         clearFailureRecord(shell, application)
                         return
                     }

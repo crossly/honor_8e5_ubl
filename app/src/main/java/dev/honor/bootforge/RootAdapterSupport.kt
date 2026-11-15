@@ -55,6 +55,16 @@ internal fun rootSwitchBlocked(recordedState: String, currentBoot: String, selec
     return currentBoot.isNotBlank() && fields.size == 2 && fields[0] == currentBoot && fields[1] != selected.id
 }
 
+internal fun verify98260WriteAccess(shell: ShellAccess, application: Application, workDir: String): String {
+    val command = Base64.getEncoder().encodeToString("$workDir/block_write_probe".toByteArray(Charsets.UTF_8))
+    val result = shell.run(application, "sh $workDir/root-command.sh '$command'", 30)
+    check(result.exitCode == 0 && result.output.lineSequence().any { it.startsWith("WRITE_OPEN_OK ") }) {
+        "98260 已取得 UID 0，但块设备 RW-open 未通过：" + result.output.takeLast(600) +
+            "；旧版 rootd 需要重启后重新提权"
+    }
+    return result.output.trim()
+}
+
 internal fun checkRootChainAllowed(shell: ShellAccess, application: Application, selected: RootChain) {
     val boot = rootBootId(shell, application)
     val recorded = shell.run(application, "cat $ROOT_CHAIN_STATE_FILE 2>/dev/null", 10).output

