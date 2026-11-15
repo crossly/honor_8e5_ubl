@@ -354,7 +354,7 @@ hnubl 及随附修补器、模块、KBL 中属于本项目的代码采用 **AGPL
 
 提权利用链由青木信史提供的MagicRoot源码改编(MagicRoot交流群：216306341)，rootd和su客户端pc98260_run_rootd、pc98260_su由quyicheng03-boop（皓皓的小月）的[CVE-2026-98260-popsicle-android](https://github.com/quyicheng03-boop/CVE-2026-98260-popsicle-android)项目改编，并对开源98260完整利用的作者致以谢意！
 
-CVE-2026-98260原始利用链源码https://github.com/V4bel/InfinityCore
+CVE-2026-98260原始利用链https://github.com/V4bel/InfinityCore
 
 ---
 
