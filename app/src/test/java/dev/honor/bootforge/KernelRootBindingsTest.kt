@@ -12,10 +12,12 @@ class KernelRootBindingsTest {
             val builtin = if (chain == RootChain.CVE_2026_98260) Root98260Adapter else Root64650Adapter
             val extra = if (chain == RootChain.CVE_2026_98260) NewKernel98260Adapter else NewKernel64650Adapter
             val g142 = if (chain == RootChain.CVE_2026_98260) G14298260Adapter else G14264650Adapter
+            val cd856 = if (chain == RootChain.CVE_2026_98260) Cd85698260Adapter else Cd85664650Adapter
             assertSame(builtin, route.resolveBackend(KernelIdentity(KERNEL_61258, "boot-a")))
             assertSame(builtin, route.resolveBackend(KernelIdentity(KERNEL_6138, "boot-a")))
             assertSame(extra, route.resolveBackend(KernelIdentity(NEW_ROOT_KERNEL_G459A, "boot-a")))
             assertSame(g142, route.resolveBackend(KernelIdentity(NEW_ROOT_KERNEL_G142, "boot-a")))
+            assertSame(cd856, route.resolveBackend(KernelIdentity(NEW_ROOT_KERNEL_CD856, "boot-a")))
         }
     }
 

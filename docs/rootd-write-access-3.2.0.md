@@ -69,4 +69,4 @@ powershell -ExecutionPolicy Bypass -File adaptation/rootd-write-fix/build-rootd-
 
 本次没有连接可执行 98260 的目标设备。源码修复、静态编译和主机/应用回归不等于真实块设备写入已经验证。需要在目标设备重启后重新建立 98260 rootd，先确认 `WRITE_OPEN_OK`，再执行原有备份和刷写流程；不要用旧 rootd 的结果代替新版本验证。
 
-`block_write_probe` 的 SHA-256 为 `14f48d9b754068bed9d0ce6dc9ea1c86d8be1db3470882635e1a27fb15e7379e`。3.2.0 的 `versionCode=120`；当前仓库增量合并后测试共 531 项，失败 0、错误 0、跳过 7。APK 内四个载荷和探测工具的哈希均已与编译输出核对。
+`block_write_probe` 的 SHA-256 为 `14f48d9b754068bed9d0ce6dc9ea1c86d8be1db3470882635e1a27fb15e7379e`。3.2.0 的 `versionCode=120`；3.2.1 项目测试共 535 项，失败 0、错误 0、跳过 7。APK 内四个载荷和探测工具的哈希均已与编译输出核对。

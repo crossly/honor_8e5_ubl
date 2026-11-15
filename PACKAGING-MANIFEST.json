@@ -1,10 +1,10 @@
 {
   "application": {
     "applicationId": "net.hawyn.honor8e5ubl",
-    "versionCode": 120,
-    "versionName": "3.2.0"
+    "versionCode": 121,
+    "versionName": "3.2.1"
   },
-  "baseline": "3.1.7",
+  "baseline": "3.1.8",
   "excluded": [
     "APKs",
     "signing private keys",
@@ -19,7 +19,7 @@
     "version": "3.1.8",
     "versionCode": 118
   },
-  "scope": "Keep SELinux permissive for 98260 rootd and verify raw block-device RW-open before flashing",
+  "scope": "Add cd85666 98260/64650 profiles with compiled payloads, SELinux-safe rootd command execution, and block-device write admission checks",
   "standaloneFakebl": {
     "applicationId": "net.hawyn.ablefispfakebl",
     "versionCode": 35,

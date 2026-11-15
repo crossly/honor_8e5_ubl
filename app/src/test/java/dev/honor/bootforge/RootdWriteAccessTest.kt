@@ -23,6 +23,17 @@ class RootdWriteAccessTest {
         assertTrue(source.contains("ROOT98260_CHILD_POLICY_FAILED"))
     }
 
+    @Test fun cd856RootdKeepsTheWriteAccessPolicy() {
+        val rootd = source("adaptation/cd85666/src/rootd.c")
+        assertTrue(rootd.contains("static const char ctx[] = \"u:r:init:s0\""))
+        assertTrue(rootd.contains("maintain_permissive() < 0 || set_su_context() < 0"))
+        assertTrue(rootd.contains("usleep(200000)"))
+        assertTrue(rootd.contains("ROOT98260_CHILD_POLICY_FAILED"))
+        val adapter = source("app/src/main/java/dev/honor/bootforge/Cd85698260Adapter.kt")
+        assertTrue(adapter.contains("NEW_ROOT_KERNEL_CD856"))
+        assertTrue(adapter.contains("verify98260WriteAccess(shell, application, WORK_DIR)"))
+    }
+
     @Test fun blockProbeChecksCapabilityAndNeverWritesPartitionData() {
         val source = source("app/src/main/cpp/block_write_probe.c")
         assertTrue(source.contains("SYS_capget"))

@@ -6,6 +6,7 @@ import dev.honor.bootforge.wireless.ShellAccess
 
 internal const val NEW_ROOT_KERNEL_G459A = "6.12.58-android16-6-g459a4285ccf8-abogki532718632-4k"
 internal const val NEW_ROOT_KERNEL_G142 = "6.12.58-android16-6-g142ddad31e60-abogki576095858-4k"
+internal const val NEW_ROOT_KERNEL_CD856 = "6.12.23-android16-5-gcd85666d7884-abogki452537391-4k"
 
 /** An exact kernel release paired with the boot in which it was observed. */
 internal data class KernelIdentity(val release: String, val bootId: String) {
@@ -19,13 +20,14 @@ internal data class KernelIdentity(val release: String, val bootId: String) {
     }
 }
 
-internal enum class KernelRootRoute { BUILTIN, EXTRA, G142 }
+internal enum class KernelRootRoute { BUILTIN, EXTRA, G142, CD856 }
 
 /** Existing exact releases retain their original adapters; no prefix fallback. */
 internal fun kernelRootRoute(release: String): KernelRootRoute? = when {
     rootProfileForKernel(release) != null -> KernelRootRoute.BUILTIN
     release == NEW_ROOT_KERNEL_G459A -> KernelRootRoute.EXTRA
     release == NEW_ROOT_KERNEL_G142 -> KernelRootRoute.G142
+    release == NEW_ROOT_KERNEL_CD856 -> KernelRootRoute.CD856
     else -> null
 }
 
@@ -85,6 +87,7 @@ class KernelDispatchRootAdapter(
     private val builtin: RootAdapter,
     private val extra: RootAdapter,
     private val g142: RootAdapter,
+    private val cd856: RootAdapter,
 ) : RootAdapter {
     @Volatile private var logCallback: ((String) -> Unit)? = null
     private val session = KernelDispatchSession<RootAdapter>(::resolveBackend)
@@ -94,6 +97,7 @@ class KernelDispatchRootAdapter(
         KernelRootRoute.BUILTIN -> builtin
         KernelRootRoute.EXTRA -> extra
         KernelRootRoute.G142 -> g142
+        KernelRootRoute.CD856 -> cd856
         null -> error("${chain.id} 未接入完整内核版本：${identity.release}")
     }
 
@@ -104,7 +108,10 @@ class KernelDispatchRootAdapter(
         try { builtin.setLogCallback(callback) }
         finally {
             try { extra.setLogCallback(callback) }
-            finally { g142.setLogCallback(callback) }
+            finally {
+                try { g142.setLogCallback(callback) }
+                finally { cd856.setLogCallback(callback) }
+            }
         }
     }
 

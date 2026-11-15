@@ -770,6 +770,19 @@ ensure_selected_abl_writable() {
     validate_current_abl_access
     if other_target_selected; then validate_other_abl_identity; fi
 }
+set_unlock_targets_rw() {
+    local data_target
+    bf_setrw_partition_table "$DISK" || return 1
+    if [ "$ABL_PARENT" != "$UD_PARENT" ]; then
+        bf_setrw_partition_table "/dev/block/$ABL_PARENT" || return 1
+    fi
+    if other_abl_needed && [ "$OTHER_ABL_PARENT" != "$UD_PARENT" ] && [ "$OTHER_ABL_PARENT" != "$ABL_PARENT" ]; then
+        bf_setrw_partition_table "/dev/block/$OTHER_ABL_PARENT" || return 1
+    fi
+    for data_target in $(printf '%s\n' "$DATA_CHAIN" | awk -F'[=:]' '/^(MAP|ORIGIN|AUX)=/ {print "/dev/block/"$2}' | sort -u); do
+        bf_replayable blockdev --setrw "$data_target" || return 1
+    done
+}
 # END block write access
 
 verify_running_slot_for_write() { check_slot; }
@@ -1274,9 +1287,8 @@ journal "EVIDENCE=caller-backup-saved-attested:$EXPORTED_HASH"
 journal "EVIDENCE=original-gpt-and-slot-unchanged:$PLAN_ID"
 journal 'PROOF=BackupVerified'
 BF_WRITE_AUTHORIZED=1
-ensure_selected_abl_writable
-bf_ensure_writable "$DISK" || die 'physical efisp/GPT disk could not be made writable'
-if [ "$SKIP_F2FS_SHRINK" = 0 ]; then ensure_data_chain_writable || die 'userdata write chain could not be made writable'; fi
+set_unlock_targets_rw || die 'blockdev setrw failed before partition adjustment'
+journal 'BLOCKDEV_RW=partition-tables-and-adjustment-targets'
 
 if [ "$SKIP_F2FS_SHRINK" = 0 ]; then
     STAGE=f2fs-online-shrink
@@ -1366,6 +1378,9 @@ if [ "$PLAN_MODE" = reuse ]; then
     [ "$(hash_file "$JOB_DIR/efisp-reuse-readback.bin")" = "$(value "$JOB_DIR/manifest.txt" EFI_BEFORE_SHA256)" ] || die 'existing efisp content changed since backup'
 fi
 
+STAGE=flash-writable-preparation
+set_unlock_targets_rw || die 'blockdev setrw failed before image flashing'
+journal 'BLOCKDEV_RW=partition-tables-and-flash-targets'
 STAGE=current-slot-abl-write
 journal "STATE=$STAGE"
 check_slot

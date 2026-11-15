@@ -1,0 +1,78 @@
+{
+  "profile_id": "cd85666",
+  "kernel_release": "6.12.23-android16-5-gcd85666d7884-abogki452537391-4k",
+  "boot_image_sha256": "e5eeda2cff592f73fa7cb0fc6e33301775d36f8d9f36918b737df0b3aec2f9b1",
+  "kernel_sha256": "c3cf2a0422b5df55cf834b60b12f614db524c77dc1b79ced56a122b59712a1a9",
+  "links": {
+    "LINK_SELINUX_STATE": "0xffffffc082656570",
+    "LINK_INIT_USER_NS": "0xffffffc0823f1360",
+    "LINK_ROOT_USER": "0xffffffc0823f15d8",
+    "LINK_INIT_GROUPS": "0xffffffc0823f2aa0",
+    "LINK_INIT_UCOUNTS": "0xffffffc0823f2f70",
+    "LINK_ALLOC_TIMER": "0xffffffc080cb8b60",
+    "LINK_ALLOC_CRED": "0xffffffc080df5358",
+    "LINK_ALLOC_TASK": "0xffffffc080d03ae4",
+    "GEOM_MEMSTART_ADDR": "0xffffffc0817e5cd8",
+    "BNE_LINK": "0xffffffc080cffbb0"
+  },
+  "function_offsets": {
+    "do_timer_create": "0xac",
+    "prepare_creds": "0x2c",
+    "copy_process": "0x158",
+    "begin_new_exec.release_task": "0xa48",
+    "begin_new_exec.down_read_killable": "0x168",
+    "begin_new_exec.posix_cpu_timers_exit": "0x2a0",
+    "begin_new_exec.exit_itimers": "0x2b0"
+  },
+  "btf_geometry": {
+    "task_struct.size": "0x1440",
+    "task_struct.cred": "0x900",
+    "task_struct.real_cred": "0x8f8",
+    "task_struct.comm": "0x910",
+    "task_struct.pid": "0x708",
+    "cred.size": "0xb8",
+    "cred.cap_effective": "0x40",
+    "cred.cap_bset": "0x48",
+    "cred.cap_ambient": "0x50",
+    "cred.security": "0x80",
+    "cred.user_ns": "0x90",
+    "k_itimer.size": "0x100",
+    "k_itimer.it.cpu.node": "0x78",
+    "k_itimer.rcu": "0xf0",
+    "selinux_state.size": "0x80",
+    "selinux_state.enforcing": "0x0",
+    "selinux_state.initialized": "0x1",
+    "selinux_write_target": "-0x7"
+  },
+  "kaslr_anchors": {
+    "worker_thread": "0xffffffc080b2f74c",
+    "rcu_gp_fqs_loop": "0xffffffc080d21be4",
+    "rcu_gp_kthread": "0xffffffc080d20f08",
+    "folio_wait_bit_common": "0xffffffc08010c158",
+    "ufshcd_issue_dev_cmd": "0xffffffc080f25c6c",
+    "icc_set_bw": "0xffffffc080b009cc",
+    "prepare_creds": "0xffffffc080df532c",
+    "selinux_state": "0xffffffc082656570"
+  },
+  "runtime": {
+    "GEO_TASK_OBJSIZE": "fallback 5696; runtime reads /proc/slabinfo",
+    "GEO_TASK_OBJ_PER_SLAB": 5,
+    "GEO_TASK_SLAB_PAGES": 8,
+    "GEO_POSIX_TIMER_OBJSIZE": 256,
+    "GEO_POSIX_TIMER_OBJ_PER_SLAB": 32,
+    "GEO_POSIX_TIMER_SLAB_ORDER": 1,
+    "GEOM_MEMSTART_PFN": "0x80000 (inferred; confirm on device)",
+    "KASLR_SLIDE": "derived per boot, not hardcoded"
+  },
+  "syms": {
+    "undefined": 226,
+    "resolved": 226,
+    "missing": 0
+  },
+  "selinux_handoff": {
+    "rootd_policy": "maintain permissive every 200ms; command child uses u:r:init:s0",
+    "admission": "uid=0, CAP_SYS_ADMIN and real block device O_RDWR probe before root registration",
+    "no_ksu_added": true
+  },
+  "validation": "static derivation only; no matching device was connected"
+}

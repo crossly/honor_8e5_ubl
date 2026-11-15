@@ -561,6 +561,15 @@ ensure_selected_abl_writable() {
     validate_current_abl_access
     if other_target_selected; then validate_other_abl_identity; fi
 }
+set_unlock_targets_rw() {
+    bf_setrw_partition_table "$DISK" || return 1
+    if [ "$ABL_PARENT" != "$UD_PARENT" ]; then
+        bf_setrw_partition_table "/dev/block/$ABL_PARENT" || return 1
+    fi
+    if other_abl_needed && [ "$OTHER_ABL_PARENT" != "$UD_PARENT" ] && [ "$OTHER_ABL_PARENT" != "$ABL_PARENT" ]; then
+        bf_setrw_partition_table "/dev/block/$OTHER_ABL_PARENT" || return 1
+    fi
+}
 # END block write access
 
 verify_running_slot_for_write() {
@@ -935,13 +944,8 @@ run_ext4_write() {
 }
 
 BF_WRITE_AUTHORIZED=1
-ensure_selected_abl_writable
-if [ "$PLAN_MODE" = create ]; then
-    bf_ensure_writable "$DISK" || die 'userdata GPT disk could not be made writable'
-    bf_ensure_bound_writable "$USERDATA" /dev/block/by-name/userdata || die 'userdata could not be made writable'
-else
-    bf_ensure_bound_writable "$EFISP" /dev/block/by-name/efisp || die 'efisp could not be made writable'
-fi
+set_unlock_targets_rw || die 'blockdev setrw failed before partition adjustment'
+log 'BLOCKDEV_RW=partition-tables-and-adjustment-targets'
 
 if [ "$PLAN_MODE" = create ]; then
     disk_idle || die 'userdata disk became busy after preflight'
@@ -1036,6 +1040,8 @@ bf_readonly_state "$EFISP" >/dev/null || die 'efisp read-only state became unkno
 }
 STAGE=targets-final-validation
 validate_efisp_target
+set_unlock_targets_rw || die 'blockdev setrw failed before image flashing'
+log 'BLOCKDEV_RW=partition-tables-and-flash-targets'
 STAGE=abl-write
 # Re-read running-slot information immediately before the sole abl write.
 if command -v getprop >/dev/null 2>&1; then accept_slot "$(getprop ro.boot.slot_suffix 2>/dev/null)" ro.boot.slot_suffix; fi

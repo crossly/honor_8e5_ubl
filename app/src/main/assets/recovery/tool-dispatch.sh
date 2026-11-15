@@ -283,6 +283,15 @@ bf_replayable() {
     "$bf_bundle" "$@"
 }
 
+bf_setrw_partition_table() {
+    local bf_disk=$1 bf_disk_name=${1##*/} bf_partition
+    bf_replayable blockdev --setrw "$bf_disk" || return 1
+    for bf_partition in /sys/class/block/"$bf_disk_name"/"$bf_disk_name"*; do
+        [ -d "$bf_partition" ] || continue
+        bf_replayable blockdev --setrw "/dev/block/${bf_partition##*/}" || return 1
+    done
+}
+
 bf_sgdisk_primary() {
     local bf_system bf_bundle
     bf_system=$(bf_system_path sgdisk) || bf_system=

@@ -36,7 +36,7 @@ class KernelRootDispatcherTest {
             when (kernelRootRoute(identity.release)) {
                 KernelRootRoute.BUILTIN -> builtin
                 KernelRootRoute.EXTRA -> extra
-                KernelRootRoute.G142, null -> error("No fixture for kernel route")
+                KernelRootRoute.G142, KernelRootRoute.CD856, null -> error("No fixture for kernel route")
             }
         }
 
@@ -47,6 +47,7 @@ class KernelRootDispatcherTest {
         assertEquals(KernelRootRoute.BUILTIN, kernelRootRoute(KERNEL_6138))
         assertEquals(KernelRootRoute.EXTRA, kernelRootRoute(NEW_ROOT_KERNEL_G459A))
         assertEquals(KernelRootRoute.G142, kernelRootRoute(NEW_ROOT_KERNEL_G142))
+        assertEquals(KernelRootRoute.CD856, kernelRootRoute(NEW_ROOT_KERNEL_CD856))
     }
 
     @Test fun unknownBuildsNeverMatchByKernelPrefixOrPartialHash() {
@@ -206,22 +207,26 @@ class KernelRootDispatcherTest {
             val builtin = CallbackAdapter()
             val extra = CallbackAdapter()
             val g142 = CallbackAdapter()
-            val dispatch = KernelDispatchRootAdapter(chain, builtin, extra, g142)
+            val cd856 = CallbackAdapter()
+            val dispatch = KernelDispatchRootAdapter(chain, builtin, extra, g142, cd856)
             val messages = mutableListOf<String>()
             val callback: (String) -> Unit = { messages += it }
             dispatch.setLogCallback(callback)
             assertSame(callback, builtin.callback)
             assertSame(callback, extra.callback)
             assertSame(callback, g142.callback)
+            assertSame(callback, cd856.callback)
             builtin.callback?.invoke("old"); extra.callback?.invoke("new")
             assertEquals(listOf("old", "new"), messages)
             dispatch.setLogCallback(null)
             assertNull(builtin.callback)
             assertNull(extra.callback)
             assertNull(g142.callback)
+            assertNull(cd856.callback)
             assertEquals(0, builtin.operations)
             assertEquals(0, extra.operations)
             assertEquals(0, g142.operations)
+            assertEquals(0, cd856.operations)
         }
     }
 
@@ -229,13 +234,15 @@ class KernelRootDispatcherTest {
         val builtin = CallbackAdapter()
         val extra = CallbackAdapter()
         val g142 = CallbackAdapter()
-        val dispatch = KernelDispatchRootAdapter(RootChain.DEFAULT, builtin, extra, g142)
+        val cd856 = CallbackAdapter()
+        val dispatch = KernelDispatchRootAdapter(RootChain.DEFAULT, builtin, extra, g142, cd856)
         dispatch.setLogCallback { }
         builtin.failNullCallback = true
         assertThrows(IllegalStateException::class.java) { dispatch.setLogCallback(null) }
         assertNull(builtin.callback)
         assertNull(extra.callback)
         assertNull(g142.callback)
+        assertNull(cd856.callback)
     }
 
     private class CallbackAdapter : RootAdapter {
