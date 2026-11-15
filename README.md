@@ -352,9 +352,12 @@ hnubl 及随附修补器、模块、KBL 中属于本项目的代码采用 **AGPL
 
 第三方组件沿用各自许可证，项目整体许可不替代其原有声明。请保留 [`app/src/main/assets/licenses/`](app/src/main/assets/licenses/) 及 [`third_party/`](third_party/) 中的许可证、来源和 NOTICE。项目按现状提供，设备和固件适用性需要由使用者确认。
 
-首版工具基于str123解锁后的设备中提取的efisp.img制作，第二版虽彻底移除该镜像，但也是我开发hnubl的起源，为此向str123致谢！
+
 感谢道可道公布的efisp利用，让各大品牌8e5设备的解锁和假回锁成为了可能！
+
 感谢superturtlee对[gbl_root_canoe](https://github.com/SuperTurtleDev/gbl_root_canoe)的开源，为将abl修补为efisp的功能和假回锁的研究提供帮助！
+
+首版工具基于str123解锁后的设备中提取的efisp.img制作，第二版虽彻底移除该镜像，但也是我开发hnubl的起源，为此向str123致谢！
 
 提权利用链由青木信史提供的MagicRoot源码改编(MagicRoot交流群：216306341)，rootd和su客户端pc98260_run_rootd、pc98260_su由quyicheng03-boop（皓皓的小月）的[CVE-2026-98260-popsicle-android](https://github.com/quyicheng03-boop/CVE-2026-98260-popsicle-android)项目改编，并对开源98260完整利用的作者致以谢意！
 
